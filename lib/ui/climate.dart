@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../util/utils.dart';
+import '../util/utils.dart' as util;
+import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Climate extends StatefulWidget {
   @override
@@ -7,6 +10,12 @@ class Climate extends StatefulWidget {
 }
 
 class _ClimateState extends State<Climate> {
+
+  void showStuff() async {
+   Map data =  await getWeather(util.apiId, util.defaultCity);
+   print(data.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -17,7 +26,7 @@ class _ClimateState extends State<Climate> {
         actions: <Widget>[
           new IconButton(
             icon: new Icon(Icons.menu),
-            onPressed: () => debugPrint("Hey")
+            onPressed: showStuff
           )
         ],
       ),
@@ -44,15 +53,32 @@ class _ClimateState extends State<Climate> {
 
           new Container(
             margin: const EdgeInsets.fromLTRB(30.0, 300.0, 0.0, 20.0),
-            alignment: Alignment.center,
-            child: new Text('123F', style: tempStyle()),
+            child: updateTempWidget("Beira"),
           )
 
         ],
       )
     );
   }
-}
+
+  Future<Map> getWeather(String apiId, String city) async
+  {
+    String apiUrl = 'http://api.openweathermap.org/data/2.5/weather?q=$city&appid=''${util.apiId}&units=imperial';
+    http.Response response =  await http.get(apiUrl);
+    return json.decode(response.body);
+  }
+
+
+  Widget updateTempWidget(String city) {
+    return new FutureBuilder(
+      future: getWeather(util.apiId, city),
+        builder: (BuildContext context, AsyncSnapshot<Map> snapshot) {
+          // where we get all of the info or jsom data, we setup widget etc
+
+        });
+  }
+
+ }
 
 
 TextStyle cityStyle() {
